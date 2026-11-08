@@ -133,20 +133,35 @@ function renderizarImoveis(lista) {
     container.innerHTML = lista.map(criarCard).join("");
 }
 
-function pesquisarImoveis() {
-    const cidade = document.getElementById("cidade").value.trim();
 
-    if (!cidade) {
-        alert("Digite uma cidade ou bairro para pesquisar.");
+function normalizarTexto(texto) {
+    return texto
+        .normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, "")
+        .toLowerCase()
+        .trim();
+}
+
+function pesquisarImoveis() {
+    const pesquisa = document.getElementById("cidade").value.trim();
+
+    if (!pesquisa) {
+        alert("Digite uma cidade, bairro ou tipo de imóvel para pesquisar.");
         return;
     }
 
-    const encontrados = imoveis.filter(imovel =>
-        imovel.cidade.toLowerCase().includes(cidade.toLowerCase())
-    );
+    const termo = normalizarTexto(pesquisa);
+
+    const encontrados = imoveis.filter(imovel => {
+        const informacoes = normalizarTexto(
+            `${imovel.nome} ${imovel.tipo} ${imovel.cidade}`
+        );
+
+        return informacoes.includes(termo);
+    });
 
     document.getElementById("mensagem-busca").textContent =
-        `Resultados para: ${cidade}`;
+        `Resultados para: ${pesquisa}`;
 
     mostrarTela("resultados");
     renderizarImoveis(encontrados);
