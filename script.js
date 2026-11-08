@@ -82,7 +82,29 @@ function formatarPreco(valor) {
     });
 }
 
+
+function obterFavoritos() {
+    return JSON.parse(localStorage.getItem("imoveisFavoritos")) || [];
+}
+
+function alternarFavorito(id) {
+    let favoritos = obterFavoritos();
+
+    if (favoritos.includes(id)) {
+        favoritos = favoritos.filter(favorito => favorito !== id);
+    } else {
+        favoritos.push(id);
+    }
+
+    localStorage.setItem("imoveisFavoritos", JSON.stringify(favoritos));
+
+    renderizarImoveis(imoveis);
+}
+
 function criarCard(imovel) {
+    const favoritos = obterFavoritos();
+    const favoritado = favoritos.includes(imovel.id);
+
     return `
         <article class="property-card">
             <img src="${imovel.imagem}"
@@ -94,6 +116,12 @@ function criarCard(imovel) {
                 <p>${imovel.cidade}</p>
                 <p>${imovel.quartos} quartos • ${imovel.area} m²</p>
                 <div class="price">${formatarPreco(imovel.preco)}</div>
+
+                <button class="favorite-btn"
+                    onclick="alternarFavorito(${imovel.id})"
+                    aria-label="${favoritado ? 'Remover dos' : 'Adicionar aos'} favoritos">
+                    ${favoritado ? '❤️' : '♡'}
+                </button>
 
                 <button class="details-btn"
                     onclick="verDetalhes(${imovel.id})"
@@ -166,7 +194,6 @@ function pesquisarImoveis() {
     mostrarTela("resultados");
     renderizarImoveis(encontrados);
 }
-
 function filtrarImoveis() {
     const tipo = document.getElementById("filtro").value;
 
